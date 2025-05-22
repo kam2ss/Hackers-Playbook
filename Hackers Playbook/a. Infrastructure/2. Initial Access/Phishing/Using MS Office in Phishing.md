@@ -1,0 +1,1 @@
+A Microsoft Office document can contain `macros`; macros do have a legitimate use but can also be used to run computer commands that can cause malware to be installed onto the victim's computer to connect back to an attacker's network.
