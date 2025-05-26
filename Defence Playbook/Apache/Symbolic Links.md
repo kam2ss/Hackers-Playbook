@@ -1,1 +1,0 @@
-Symbolic links act like reference to a file or directory. 

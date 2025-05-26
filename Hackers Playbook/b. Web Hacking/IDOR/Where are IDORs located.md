@@ -1,3 +1,0 @@
-The endpoint you're targeting might not always show up in the URL bar. Sometimes, it's loaded in the background by your browser using AJAX or found in a JavaScript file.
-
-In some cases, hidden parameters used during development accidentally make it to the live site. For example, you might see `/user/details` showing your info. But by testing (parameter mining), you find adding `?user_id=123` lets you see another user's details. This happens because the server doesn't properly check if you're allowed to access that data.
