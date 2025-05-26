@@ -1,0 +1,9 @@
+# Ignore everything
+/*
+
+# Only include these folders
+!.gitignore
+!Defence Playbook/
+!Hackers Playbook/
+!Hacking Tools/
+!TryHackMe walkthrough
