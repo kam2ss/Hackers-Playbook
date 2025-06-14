@@ -6,11 +6,13 @@
 ```cmd
 net localgroup administrators thmuser0 /add
 ```
+- This will allow access to the server by using `RDP`, `WinRM`, or any other remote administration service.
 
 If that looks suspicious, use the `Backup Operators` group. Users in this group won't have administrative privileges, but will be ***allowed to read/write any file or registry key on the system, ignoring any configured DACL***. This will allows us to copy the content of the `SAM` and `SYSTEM` registry hives.
 ```cmd
 net localgroup "Backup Operators" thmuser1 /add
 ```
+- It **cannot `RDP` or `WinRM`**, unless we add it to the `Remote Desktop Users (RDP)` or `Remote Management Users (WinRM)` groups.
 
 ---
 

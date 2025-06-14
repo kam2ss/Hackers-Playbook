@@ -23,7 +23,7 @@ wmic useraccount get name,sid
 ```
 
 #### Assign the RID to a user
-To do so, we need to access the SAM using regedit. The ***SAM is restricted to the SYSTEM account only***, so even the Administrator won't be able to edit it.
+To do so, we need to ***access the SAM using regedit***. The ***SAM is restricted to the SYSTEM account only***, so even the Administrator won't be able to edit it.
 
 1. **To run the `Regedit` as SYSTEM**
 ```cmd
@@ -33,7 +33,7 @@ PsExec64.exe -i -s regedit
 This will bring the `Regedit` GUI windows as SYSTEM.
 
 2. **Navigate in Regedit**
-`HKLM\Computer\HKEY_LOCAL_MACHINE\SAM\SAM\Domains\Account\Users\`
+`HKLM\SAM\SAM\Domains\Account\Users\`
 
 3. **Find the User's key**
 	- Convert its RID (e.g. `1010` = `0x3F2`) to hex.
@@ -42,4 +42,4 @@ This will bring the `Regedit` GUI windows as SYSTEM.
 	- Locate the RID at offset `0x30`.
 	- Replace it with **Administrator's RID (`500` = `0X01f4` -> little-endian = `F401`).
 
-
+The next time the `<user>` logs in, LSASS will associate it with the same RID as Administrator and grant them the same privileges.
