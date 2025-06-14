@@ -5,7 +5,9 @@ These are my personal study notes organized by different topics, maintained dail
 ## Table of Contents
 
 Defence Playbook
+
 Hackers Playbook
+
 Hacking Tools
 
 ## How to Use
