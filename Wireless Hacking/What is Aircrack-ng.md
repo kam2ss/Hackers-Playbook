@@ -25,4 +25,4 @@ It is the key cracking tool in the Aircrack suite for WEP and WPA/WPA2-PSK keys.
 - `WEP:` keys are typically cracked using the `PTW method`.
 - `WPA/WPA2:` keys are cracked with `dictionary attacks.`
 - Aircrack-ng relies on ***packet capture data*** for WEP cracking.
-- For WPA/WPA2, it requires the 4-way hand
+- For WPA/WPA2, it requires the 4-way handshake.
