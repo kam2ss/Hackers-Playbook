@@ -11,7 +11,7 @@ airmon-ng stop wlan0mon
 
 #### Scan Wireless Networks
 **Scans for wireless networks and displays BSSID, channel, encryption, and connected clients**
-```
+```bash
 airodump-ng wlan0mon
 ```
 
