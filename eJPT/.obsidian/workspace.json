@@ -1,0 +1,157 @@
+{
+  "main": {
+    "id": "2af04222aefed98d",
+    "type": "split",
+    "children": [
+      {
+        "id": "95020c6e835f66e8",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "63f17a2a06f8a3fd",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Passive Information Gathering/DNS Recon.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "919df7dbd790d563",
+    "type": "split",
+    "children": [
+      {
+        "id": "490067cf2562d307",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "cb51625dc453fbcc",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "de79995c6f04c5c7",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "b3a816aafb44c592",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "bd4e07be7420f6f1",
+    "type": "split",
+    "children": [
+      {
+        "id": "f22e572d811e1d39",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "961020e2a78ec8e7",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "Passive Information Gathering/DNS Recon.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "016d5b0dd11f59be",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "Passive Information Gathering/DNS Recon.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "b05f834fe203f198",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true
+              }
+            }
+          },
+          {
+            "id": "d5aa3e532d504672",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "Passive Information Gathering/DNS Recon.md"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false
+    }
+  },
+  "active": "63f17a2a06f8a3fd",
+  "lastOpenFiles": [
+    "Passive Information Gathering/Whois Enumeration.md",
+    "Passive Information Gathering/Website Recon & Footprinting.md",
+    "Passive Information Gathering/WAF With wafw00f.md",
+    "Passive Information Gathering/theHarvester.md",
+    "Passive Information Gathering/Sublist3r.md"
+  ]
+}
