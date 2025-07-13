@@ -53,6 +53,9 @@ cp /bin/bash ./bash
 `Using your system's **default Bash binary** may not be compatible with all targets. In that case, create your own binary.`
 
 **C script that launches a shell as the root user (UID 0)**
+```bash
+vim bash.c
+```
 
 ```c
 #include <stdlib.h>
