@@ -45,7 +45,14 @@ lookup.thm
 ```
 - We get a basic login page.
 
-<<<<<<< HEAD
+When we try to input some random creds, we get an error message saying `Wrong username or password. Please try again. Redirecting in 3 seconds.` However, when we try default creds like `admin:admin`, we only get `Wrong password. Please try again. Redirecting in 3 seconds.` We can also see that the `HTTP Method: POST` and `Subdirectory: login.php` pop up for a few seconds. We can confirm this by nmap scan.
+
+#### Nmap to Discover the Login Page
+```bash
+nmap -p80 --script http-enum <IP>
+```
+
+Now that we have managed to find the login page, we can try to `brute-force` this page. Before finding passwords we need to find users in the website. One of the users is `admin`, we can confirm that from earlier error message. We can use a Python script to find users.
 #### Python Script to Enumerate Users
 ```python
 import requests
@@ -132,4 +139,3 @@ nmap -p80 --script http-enum <IP>
 Now that we have managed to find a login page, we can try to `Brute-Force` this page.
 
 #### Brute Force the Login Page with Hydra
->>>>>>> 542b9b485bb343840fc576ed818622ed33e4de22
