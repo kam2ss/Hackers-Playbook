@@ -37,12 +37,23 @@ OS and Service detection performed. Please report any incorrect results at https
 Nmap done: 1 IP address (1 host up) scanned in 23.87 seconds
 ```
 
-Browsing the IP gives us `We can’t connect to the server at lookup.thm.`, meaning the computer tried to reach the address `http://lookup.thm` but couldn't find or connect to the server.
-
-To overcome this issue we need to map the `ip` to `hostname` in `/etc/hosts (a local file where you manually map hostnames to IP addresses)` file because the internal lab domains aren't publicly registered. 
+Browsing the IP gives us `We can’t connect to the server at lookup.thm.`, meaning the computer tried to reach the address `http://lookup.thm` but couldn't find or connect to the server. To overcome this issue we need to map the `ip` to `hostname` in `/etc/hosts (a local file where you manually map hostnames to IP addresses)` file because the internal lab domains aren't publicly registered. 
 
 #### Browse the hostname
 ```bash
 lookup.thm
 ```
 - We get a basic login page.
+
+When we try to input some random creds, we get an error saying `Wrong username or password. Please try again. Redirecting in 3 seconds.` However, when we try default creds like `admin:admin`, we only see the password error and not the username error `Wrong password. Please try again. Redirecting in 3 seconds.` which means that the `admin` is a genuine username.
+
+Next we check the `Network` tab in `Inspect page/Web Developer Tools`.  We can see there's an error saying `Wrong username or password. Please try again. Redirecting in 3 seconds.` We can also see that the `HTTP Method: POST` and `Subdirectory: login.php` popped up for a few second. We can confirm this by nmap scan.
+
+#### Nmap to Discover the Login Page
+```bash
+nmap -p80 --script http-enum <IP>
+```
+
+Now that we have managed to find a login page, we can try to `Brute-Force` this page.
+
+#### Brute Force the Login Page with Hydra
