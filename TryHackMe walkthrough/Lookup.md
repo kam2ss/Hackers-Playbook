@@ -53,6 +53,7 @@ nmap -p80 --script http-enum <IP>
 ```
 
 Now that we have managed to find the login page, we can try to `brute-force` this page. Before finding passwords we need to find users in the website. One of the users is `admin`, we can confirm that from earlier error message. We can use a Python script to find users.
+
 #### Python Script to Enumerate Users
 ```python
 import requests
@@ -106,14 +107,15 @@ if __name__ == "__main__":
     main()
 ```
 
-We have managed to extract two usernames `admin` and `jose`. Now, it's time to brute-force the password for these users.
+Note: `Make sure to use the domain name instead of the IP address.` We have managed to extract two usernames `admin` and `jose`. Now, it's time to brute-force the password for these users.
 
 #### Brute Force with Hydra
 ```bash
 hydra -l jose -P /usr/share/wordlists/rockyou.txt lookup.thm http-post-form '/login.php:username=jose&password=^PASS^:F=Wrong' -t 32
 ```
+- Password is `password123.`
 
-We've managed to crack the password of the user `jose` and the password is `password123`. We now use these credentials to login in but like earlier we get nothing. When we inspect the `Network` tab and login with the creds again, we get a new subdomain `files.lookup.thm`. 
+We now use these credentials to login in but like earlier we get nothing. When we inspect the `Network` tab and login with the creds again, we get a new subdomain `files.lookup.thm`. 
 
 This technique is called `Virtual Hosting`, where multiple domain names are hosted on the same IP. The web server uses the `Host header in the HTTP request` to determine which site to server.
 
@@ -125,17 +127,4 @@ sudo vim /etc/hosts
 IP     files.lookup.thm
 ```
 
-Once that is done, refresh the page and we are inside the website. There are a lot of files and we can check all of them. However, 
-=======
-When we try to input some random creds, we get an error saying `Wrong username or password. Please try again. Redirecting in 3 seconds.` However, when we try default creds like `admin:admin`, we only see the password error and not the username error `Wrong password. Please try again. Redirecting in 3 seconds.` which means that the `admin` is a genuine username.
-
-Next we check the `Network` tab in `Inspect page/Web Developer Tools`.  We can see there's an error saying `Wrong username or password. Please try again. Redirecting in 3 seconds.` We can also see that the `HTTP Method: POST` and `Subdirectory: login.php` popped up for a few second. We can confirm this by nmap scan.
-
-#### Nmap to Discover the Login Page
-```bash
-nmap -p80 --script http-enum <IP>
-```
-
-Now that we have managed to find a login page, we can try to `Brute-Force` this page.
-
-#### Brute Force the Login Page with Hydra
+Once that is done, refresh the page and we are inside the website. There are a lot of files and we can check all of them. 
