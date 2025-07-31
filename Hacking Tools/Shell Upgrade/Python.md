@@ -1,9 +1,16 @@
 #### If Python is Installed
+**Check Python**
+```bash
+which python python2 python3
+```
+- Checking which version of python is installed in the remote system.
+
+**Spawn a pseudo-terminal (PTY)**
 ```bash
 python3 -c 'import pty; pty.spawn("/bin/bash")'
 ```
+- Makes the reverse shell behave like a normal Linux terminal.
 
-#### Extra commands to make the shell work better if there are some issues
 **Background**
 ```bash
 ctrl +z
@@ -11,11 +18,12 @@ ctrl +z
 
 **Fix keys like `ctrl+C`, `arrows keys`, `backspace keys`**
 ```
-stty raw -echo
+stty raw -echo; fg
 ```
 
-**Foreground**
+**Back in the reverse shell**
 ```
-fg
+export TERM=xterm
+clear
 ```
 

