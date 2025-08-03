@@ -44,9 +44,21 @@ find / -perm -g=s -o -perm -4000 ! -type l -maxdepth 3 -exec ls -ld {} \; 2>/dev
 sudo -l
 ```
 
+#### Check for `.ssh` folder for Private keys
+**If there are multiple users**
+```bash
+ls -al user1 user2 user3
+```
 
+**If single user**
+```bash
+ls -al user
+```
 
-
+#### Check the PAM Configuration File
+```bash
+cat /etc/pam.d/su
+```
 
 
 
