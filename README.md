@@ -4,11 +4,15 @@ These are my personal study notes organized by different topics, maintained dail
 
 ## Table of Contents
 
+CTFs Writeup
+
 Defence Playbook
 
 Hackers Playbook
 
 Hacking Tools
+
+eJPT
 
 ## How to Use
 
@@ -18,6 +22,6 @@ Hacking Tools
 
 ## License
 
-This repo is for personal use and study purposes.
+This repo is for personal use and study purposes only.
 
 ---
