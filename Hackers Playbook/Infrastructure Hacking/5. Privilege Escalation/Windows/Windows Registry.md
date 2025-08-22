@@ -75,3 +75,10 @@ Look for the `registry key` for ***VirusScan***.
 Click the `ImagePath` and update it with your executable.
 Click OK.
 Restart the host.
+
+You will receive a `callback`, however; it will die shortly so we need to migrate to a different process.
+
+#### Migrate process
+```bash
+migrate -N LogonUI.exe
+```

