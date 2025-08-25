@@ -1,5 +1,12 @@
-### Service Principal Names
-Service principal names (SPNs) are used to identify services on Windows.
+### Kerberoasting
+Kerberoasting is an AD attack that allows a domain-connected attacker to extract SPN account hashes and crack them offline. The PowerSploit toolkit automates this process with `Invoke-Kerberoast`.
+
+#### Kerberoasting Steps
+- `Enumerate SPNs:` Find all accounts in AD that have the `servicePrincipalName` attribute.
+- `Request service tickets:` Ask DC for those services.
+- `Extract hashes:` Dump the service ticket data from memory; the ticket is encrypted with the service account's password hash.
+- `Offline cracking:` Crack hashes offline to recover the password.
+- `Impersonate service account:` Once cracket, the attacker can access resources as that service account.
 
 ### Get user SPNs
 **PowerSploit**
