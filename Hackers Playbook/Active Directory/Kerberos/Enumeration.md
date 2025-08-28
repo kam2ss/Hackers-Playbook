@@ -35,7 +35,7 @@ Kerbrute is a tool for user enumeration, brute-forcing, and password spraying ag
 When Kerberos receives a ***Ticket Granting Tickets (TGT)*** request with no preauthentication for a non-domain joined user or a non-existent user, it will respond with `KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN`. For a valid user, Kerberos will respond with either a TGT in a `AS-REP` or a `KRB5KDC_ERR_PREAUTH_REQUIRED` response.
 
 ```bash
-./kerbrute userenum /usr/share/wordlists/usernames.txt -d <domain_name> --dc <IP_ADDRESS_DOMAIN_CONTROL
+./kerbrute userenum /usr/share/wordlists/usernames.txt -d <domain_name> --dc <IP_ADDRESS_DOMAIN_CONTROL>
 ```
 
 ### Kerberos Bruteforcing

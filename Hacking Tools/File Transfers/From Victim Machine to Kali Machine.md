@@ -42,4 +42,14 @@ If you have ***SSH access***, use `sftp` to transfer files:
 sftp username@victim_ip:/path/to/file /path/to/local/destination
 ```
 
+#### PowerShell
+**On Windows (PowerShell)**
+```powershell
+cd C:\path\to\file
+python -m http.server
+```
 
+**On Kali**
+```bash
+wget http://<Win_IP>:8000/file.txt
+```
