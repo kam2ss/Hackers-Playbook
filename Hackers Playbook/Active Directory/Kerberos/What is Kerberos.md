@@ -20,7 +20,7 @@ The Kerberos protocol uses **Tickets** to ***securely transmit encrypted keys***
 #### Initial Authentication
 **Purpose:** Prove the ***user is legitimate*** and get a ***Ticket Granting Ticket (TGT).***
 
-When a ***user successfully authenticates to a domain-joined workstation***, their ***password is hashed and used as a key to encrypt a timestamp***, which is sent to the ***DC*** as an ***authentication server request (AS-REQ).***
+When a ***user successfully authenticates to a domain-joined workstation***, their ***password is hashed and used as a key to encrypt a timestamp*** , which is sent to the ***DC*** as an ***authentication server request (AS-REQ).*** `Note: Including encrypted timestamp ins the AS-REQ prevents replay attacks (an attacker can't reuse an old authentication message)`
 
 The ***DC verifies it by decrypting the request with the user's password hash in AD***, and ***confirms the timestamp is within acceptable time limits*** (one of the reasons that accurate system time is required across a Windows domain). The DC then ***responds with an authentication server reply (AS-REP).***
 
@@ -38,9 +38,11 @@ This is achieved via a ***Ticket-Granting Service Request (TGS-REQ).*** The TGS-
 - The Ticket-Granting Ticket (TGT)
 - The Client Session Key
 
-Even local authentication uses Kerberos, the requested name would comprise `HOST/<computer name>`, where ***`HOST` is the Service Principal Name*** used for built-in Windows services. The ***DC uses the TGT to verify the authenticity of the request*** and then returns a Ticket-Granting Service Request (TGS-REP), which contains:
+The ***DC uses the TGT to verify the authenticity of the request*** and then returns a Ticket-Granting Service Request (TGS-REP), which contains:
 - `TGS with (PAC=your group membership/privileges):` encrypted with the requested service password hash
 - `Service Session Key:` encrypted with the client session key
+
+Even local authentication uses Kerberos, the requested name would comprise `HOST/<computer name>`, and is the ***Service Principal Name*** used for built-in Windows services. 
 
 #### Service Principal Name
 The ***`HOST` portion is known as a Service Principal Name (SPN).*** An SPN is a unique identifier in Kerberos that ***maps a service to an account***. When an SPN is set for an account, the KDC generates a ***service key*** for that account, which is used to encrypt the service ticket. By decrypting the ticket, the server proves its identity to the client. Accounts with SPNs in AD are called ***service accounts.***
