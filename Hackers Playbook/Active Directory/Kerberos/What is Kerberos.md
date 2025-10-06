@@ -11,7 +11,7 @@
 - Ticket-Granting Service (TGS) - `creates the Service Ticket`
 
 #### Kerberos Tickets
-The Kerberos protocol uses **Tickets** to ***securely transmit encrypted keys***, which ***authenticate users to domain-joined computers and services***, and ***set limits on the timeframe*** (time-bound and only works for a limited period) that such authentication is valid.
+The Kerberos protocol uses **Tickets** to ***securely transmit encrypted keys (called session keys)***, which ***authenticate users to domain-joined computers and services***, and ***set limits on the timeframe*** (time-bound and only works for a limited period) that such authentication is valid.
 
 **Two different types of tickets are used in the process:**
 - Ticket-Granting Ticket (TGT) - also known as a primary ticket
