@@ -21,3 +21,5 @@ The attacker is tricking the system into using the `/etc/shadow` file as a confi
 echo 'ROOT HASH' > hash.txt
 john --wordlist=/usr/share/wordlists/nmap.lst hash.txt
 ```
+
+******

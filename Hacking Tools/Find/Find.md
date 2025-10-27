@@ -34,3 +34,15 @@ find / -user USERNAME -exec grep -a -i "password" {} 2>/dev/null \;
 find / -path "*/.*" -type f -exec grep -a -i "password" {} 2>/dev/null \;
 ```
 
+***
+#### Find and Execute the File or Script
+```
+find / -type f -iname sources.list | xargs cat
+```
+- faster and more readable output
+- use `xargs` - if file paths don't have spaces
+
+```
+find / -type f -iname sources.list -exec cat {} \; 
+```
+- `-exec cat {} \;`: for each found file `({}),` run `cat` on it

