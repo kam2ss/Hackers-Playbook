@@ -12,3 +12,52 @@ Get-Command <Name of the function> -Syntax
 - `Invoke-FindLocalAdminAccess:` checks the whole domain for machines where this user has local administrator access while running under a domain user.
 - `Invoke-ShareFinder:` lists all reachable shares including hidden ones.
 - `Invoke-FileFinder:` searches all accessible shares for files containing sensitive data. `-Term` switch can make it look for specific keywords.
+
+#### Manual Enumeration
+- On Windows: `net user, net group`
+- PS cmdlets: `Get-ADUser`
+- On Windows Servers: `dsquery`
+
+## Commands
+#### PowerShell
+**List Domain Users**
+```
+Get-ADUser -Filter * - Properties *
+```
+
+**List Domain Groups**
+```
+Get-ADGroup -Filter * - Properties Members
+```
+
+**List Domain Computer**
+```
+Get-ADComputer -Filter * -Properties OperatingSystem,DNSHostName
+```
+
+**Find Service Principal Names (SPNs)**
+```
+Get-ADUser -Filter {ServicePrincipalName -like "*"} -Properties ServicePrincipalName
+```
+
+**List Domain Controllers**
+```
+Get-ADDomainController - Filter *
+```
+
+**Enumerate GPOs**
+```
+Get-GPO -All
+```
+
+**Find Admin Privileges - users with Domain Admin rights**
+```
+(Get-ADGroupMember -Identity "Domain Admins" -Recursive).Name
+```
+
+
+
+Net
+```
+net group /domain
+```
